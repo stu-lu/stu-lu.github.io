@@ -21,16 +21,10 @@
     <meta http-equiv="refresh" content="{{ time }};url={{ page.target }}"/>
     <link rel="canonical" href="{{ page.target }}"/>
     <title>{{ title }}</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            max-width: 40em;
-            margin: 1em auto;
-        }
-    </style>
+
 </head>
 <body>
-    <h1>{{ title }}</h1>
+    <p>{{ title }}</p>
    
     {% if page.message %}
     <p>{{ page.message }}</p>
