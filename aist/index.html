@@ -202,6 +202,28 @@
       z-index: 5;
     }
 
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th.sortable:hover {
+      filter: brightness(1.12);
+    }
+
+    .sort-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      width: 100%;
+    }
+
+    .sort-arrow {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
     th.compact,
     td.compact {
       min-width: 46px;
@@ -613,6 +635,7 @@
         regressionWeights: null,
         regressionThreshold: 0.5,
         selectedOutcome: "foundCheating",
+        dataSort: { key: "foundResponsible", direction: "desc" },
         activeTab: "data",
         predictorSerial: 1
       };
@@ -750,30 +773,31 @@
       table.innerHTML = "";
       const thead = table.createTHead();
       const header = thead.insertRow();
-      addTh(header, "Student", "compact");
+      addSortableTh(header, "Student", "id", "compact");
       state.predictors.forEach((predictor, pi) => {
-        const th = document.createElement("th");
+        const th = sortableTh(predictor.key);
         if (pi < basePredictors.length) {
-          th.textContent = predictor.label;
+          th.append(sortLabel(predictor.label, predictor.key));
         } else {
           const input = document.createElement("input");
           input.type = "text";
           input.value = predictor.label;
+          input.addEventListener("click", (event) => event.stopPropagation());
           input.addEventListener("input", (event) => {
             predictor.label = event.target.value || `Added Predictor ${pi - basePredictors.length + 1}`;
             renderManual();
             renderRegression();
           });
-          th.append(input);
+          th.append(input, sortIndicator(predictor.key));
         }
         header.append(th);
       });
-      addTh(header, "Private Tutor [not in university data]", "unavailable");
-      addTh(header, "Found Cheating (0/1)", "found");
-      addTh(header, "Self-Reported Cheating (0/1)", "self");
+      addSortableTh(header, "Private Tutor [not in university data]", "privateTutor", "unavailable");
+      addSortableTh(header, "Found Cheating (0/1)", "foundResponsible", "found");
+      addSortableTh(header, "Self-Reported Cheating (0/1)", "selfReported", "self");
 
       const tbody = table.createTBody();
-      state.rows.forEach((row, ri) => {
+      sortedDataRows().forEach((row, ri) => {
         const tr = tbody.insertRow();
         addTd(tr, row.id, "compact");
         state.predictors.forEach((predictor) => {
@@ -803,6 +827,37 @@
           renderRegression();
         }));
       });
+    }
+
+    function sortedDataRows() {
+      const rows = [...state.rows];
+      const { key, direction } = state.dataSort;
+      const multiplier = direction === "asc" ? 1 : -1;
+      rows.sort((a, b) => {
+        const av = sortValue(a, key);
+        const bv = sortValue(b, key);
+        if (av < bv) return -1 * multiplier;
+        if (av > bv) return 1 * multiplier;
+        return a.id - b.id;
+      });
+      return rows;
+    }
+
+    function sortValue(row, key) {
+      if (key === "id") return row.id;
+      if (key === "privateTutor") return row.privateTutor;
+      if (key === "foundResponsible") return row.foundResponsible;
+      if (key === "selfReported") return row.selfReported;
+      return toNumber(row.values[key]);
+    }
+
+    function setDataSort(key) {
+      if (state.dataSort.key === key) {
+        state.dataSort.direction = state.dataSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        state.dataSort = { key, direction: key === "foundResponsible" ? "desc" : "asc" };
+      }
+      renderData();
     }
 
     function renderManual() {
@@ -1226,6 +1281,36 @@
       }
       row.append(th);
       return th;
+    }
+
+    function addSortableTh(row, text, key, className = "") {
+      const th = sortableTh(key, className);
+      th.append(sortLabel(text, key));
+      row.append(th);
+      return th;
+    }
+
+    function sortableTh(key, className = "") {
+      const th = document.createElement("th");
+      th.className = `${className ? `${className} ` : ""}sortable`;
+      th.addEventListener("click", () => setDataSort(key));
+      return th;
+    }
+
+    function sortLabel(text, key) {
+      const span = document.createElement("span");
+      span.className = "sort-label";
+      const label = document.createElement("span");
+      label.textContent = text;
+      span.append(label, sortIndicator(key));
+      return span;
+    }
+
+    function sortIndicator(key) {
+      const span = document.createElement("span");
+      span.className = "sort-arrow";
+      span.textContent = state.dataSort.key === key ? (state.dataSort.direction === "asc" ? "▲" : "▼") : "";
+      return span;
     }
 
     function addTd(row, text, className = "") {
