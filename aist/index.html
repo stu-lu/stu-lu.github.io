@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AIST Regression Activity</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #5d6975;
+      --line: #d6dde5;
+      --panel: #ffffff;
+      --page: #f4f7f9;
+      --navy: #1f4e79;
+      --green: #d9ead3;
+      --green-strong: #38761d;
+      --yellow: #fff2cc;
+      --yellow-strong: #7f6000;
+      --blue: #ddebf7;
+      --blue-strong: #1c4587;
+      --red: #fce4d6;
+      --red-strong: #cc4125;
+      --gray: #e6e8eb;
+      --gray-strong: #9aa3ad;
+      --focus: #2563eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+      padding: 14px 18px 10px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      line-height: 1.2;
+      color: var(--navy);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tab-button,
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .tab-button,
+    button {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      min-height: 34px;
+      padding: 7px 11px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .tab-button[aria-selected="true"] {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    button.primary {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    button.danger {
+      background: #ffffff;
+      border-color: var(--red-strong);
+      color: var(--red-strong);
+    }
+
+    button:disabled {
+      color: var(--gray-strong);
+      cursor: not-allowed;
+      background: var(--gray);
+    }
+
+    main {
+      padding: 18px;
+    }
+
+    section[hidden] {
+      display: none;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 14px;
+    }
+
+    .field {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      min-height: 34px;
+    }
+
+    .field input,
+    .field select,
+    th input {
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 6px 8px;
+      min-height: 32px;
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    input[type="number"] {
+      width: 82px;
+      text-align: right;
+    }
+
+    input:focus,
+    select:focus,
+    button:focus {
+      outline: 2px solid var(--focus);
+      outline-offset: 1px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 420px) minmax(300px, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .band {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .band-title {
+      background: var(--navy);
+      color: #ffffff;
+      font-weight: 700;
+      padding: 8px 10px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-width: 100%;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: #ffffff;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 6px 7px;
+      text-align: center;
+      vertical-align: middle;
+      min-width: 72px;
+    }
+
+    th {
+      background: var(--navy);
+      color: #ffffff;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    th.compact,
+    td.compact {
+      min-width: 46px;
+      width: 46px;
+    }
+
+    td.left,
+    th.left {
+      text-align: left;
+    }
+
+    tr:nth-child(even) td {
+      background: #fafbfc;
+    }
+
+    .manual {
+      background: var(--green) !important;
+    }
+
+    .found {
+      background: var(--yellow) !important;
+    }
+
+    .self {
+      background: var(--blue) !important;
+    }
+
+    th.manual {
+      background: var(--green-strong) !important;
+      color: #ffffff;
+    }
+
+    th.found {
+      background: var(--yellow-strong) !important;
+      color: #ffffff;
+    }
+
+    th.self {
+      background: var(--blue-strong) !important;
+      color: #ffffff;
+    }
+
+    .unavailable {
+      background: var(--gray) !important;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .error-fp {
+      background: var(--red) !important;
+      color: #7f1d1d;
+      font-weight: 700;
+    }
+
+    .error-fn {
+      background: #fde2e2 !important;
+      color: #7f1d1d;
+      font-weight: 700;
+    }
+
+    .error-tp {
+      background: #dcfce7 !important;
+      color: #14532d;
+      font-weight: 700;
+    }
+
+    .error-tn {
+      background: #eef2f7 !important;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(110px, 1fr));
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .confusion-panel {
+      padding: 10px;
+    }
+
+    .confusion-summary {
+      margin-top: 8px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .rate-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(160px, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .rate {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 8px;
+      min-height: 58px;
+    }
+
+    .rate.clickable {
+      cursor: pointer;
+    }
+
+    .rate.clickable:hover {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.14);
+    }
+
+    .rate .label {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+      margin-bottom: 5px;
+    }
+
+    .rate .value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .confusion-table th,
+    .confusion-table td {
+      min-width: 92px;
+    }
+
+    .confusion-table .axis {
+      background: #334155;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .confusion-table .tp,
+    .confusion-table .tn {
+      background: #dcfce7;
+      color: #14532d;
+      font-weight: 700;
+    }
+
+    .confusion-table .fp,
+    .confusion-table .fn {
+      background: #fde2e2;
+      color: #7f1d1d;
+      font-weight: 700;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      min-height: 66px;
+      padding: 8px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .metric .value {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .note {
+      color: var(--muted);
+      padding: 9px 10px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .status {
+      color: var(--muted);
+      min-height: 22px;
+    }
+
+    .coef-pos {
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .coef-neg {
+      color: #991b1b;
+      font-weight: 700;
+    }
+
+    .coef-zero {
+      color: var(--muted);
+    }
+
+    td.weight-scale input {
+      background: #ffffff;
+      color: #111827;
+      border-color: #9aa3ad;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        padding: 12px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-grid {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Academic Integrity Screening Tool</h1>
+    <nav class="tabs" aria-label="Activity steps">
+      <button class="tab-button" data-tab="data" aria-selected="true">1 Data</button>
+      <button class="tab-button" data-tab="manual" aria-selected="false">2 Guess Weights</button>
+      <button class="tab-button" data-tab="regression" aria-selected="false">3 Regression</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="tab-data">
+      <div class="toolbar">
+        <button id="add-row" class="primary">Add Row</button>
+        <button id="remove-row">Remove Added Row</button>
+        <span class="field">
+          <label for="new-predictor">New predictor</label>
+          <input id="new-predictor" type="text" maxlength="28" placeholder="Column name">
+        </span>
+        <button id="add-predictor" class="primary">Add Predictor</button>
+        <button id="reset-data" class="danger">Reset</button>
+        <span id="data-status" class="status"></span>
+      </div>
+      <div class="band">
+        <div class="band-title">Data</div>
+        <div class="table-wrap">
+          <table id="data-table"></table>
+        </div>
+        <div class="note">This is a student-level score: in the scenario, professors and staff would see it across later interactions. Private Tutor remains unavailable because the institution does not collect it.</div>
+      </div>
+    </section>
+
+    <section id="tab-manual" hidden>
+      <div class="toolbar">
+        <span class="field">
+          <label for="manual-outcome">Outcome / target / dependent variable</label>
+          <select id="manual-outcome"></select>
+        </span>
+      </div>
+      <div class="grid">
+        <div class="band">
+          <div class="band-title">Manual Model Inputs</div>
+          <div class="table-wrap">
+            <table id="manual-weights"></table>
+          </div>
+        </div>
+        <div>
+          <div class="band">
+            <div id="manual-metrics-title" class="band-title">Confusion Matrix</div>
+            <div id="manual-metrics" class="metric-grid"></div>
+          </div>
+        </div>
+      </div>
+      <div class="band">
+        <div class="band-title">Manual Model Outputs By Student</div>
+        <div class="table-wrap">
+          <table id="manual-output"></table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-regression" hidden>
+      <div class="toolbar">
+        <span class="field">
+          <label for="reg-outcome">Outcome / target / dependent variable</label>
+          <select id="reg-outcome"></select>
+        </span>
+        <span class="field">
+          <label for="reg-threshold">Decision threshold</label>
+          <input id="reg-threshold" type="number" step="0.05" min="-10" max="10">
+        </span>
+        <button id="reset-regression-weights" class="primary">Reset Weights To Regression</button>
+        <span id="reg-status" class="status"></span>
+      </div>
+      <div class="grid">
+        <div class="band">
+          <div class="band-title">Learned Weights</div>
+          <div class="table-wrap">
+            <table id="reg-weights"></table>
+          </div>
+        </div>
+        <div>
+          <div class="band">
+            <div id="reg-metrics-title" class="band-title">Regression Confusion Matrix</div>
+            <div id="reg-metrics" class="metric-grid"></div>
+          </div>
+        </div>
+      </div>
+      <div class="band">
+        <div class="band-title">Regression Outputs By Student</div>
+        <div class="table-wrap">
+          <table id="reg-output"></table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const BASE_ROWS = 35;
+    const MAX_ROWS = 50;
+    const MAX_PREDICTORS = 11;
+
+    const basePredictors = [
+      { key: "wc", label: "Writing Center Visits" },
+      { key: "fa", label: "Financial Aid (0/1)" },
+      { key: "counseling", label: "Counseling Appts" },
+      { key: "roommate", label: "Roommate Found Cheating (0/1)" },
+      { key: "reports", label: "Anonymous Reports on File" },
+      { key: "pell", label: "Pell Grant (0/1)" },
+      { key: "international", label: "International Student (0/1)" },
+      { key: "stem", label: "STEM Major (0/1)" },
+      { key: "years", label: "Years Enrolled (1-6)" }
+    ];
+
+    const outcomes = {
+      foundCheating: {
+        key: "foundResponsible",
+        label: "Found Cheating",
+        shortLabel: "Found Cheating",
+        css: "found"
+      },
+      selfReported: {
+        key: "selfReported",
+        label: "Self-Reported Cheating",
+        shortLabel: "Self-Report",
+        css: "self"
+      }
+    };
+
+    const starterRows = [
+      [4, 1, 2, 1, 2, 1, 1, 0, 1, 0, 0],
+      [3, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1],
+      [4, 1, 3, 1, 1, 1, 1, 0, 2, 0, 0],
+      [2, 1, 2, 0, 2, 1, 0, 1, 1, 0, 1],
+      [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [4, 1, 2, 0, 0, 1, 0, 0, 2, 0, 0],
+      [2, 1, 0, 1, 2, 1, 1, 1, 1, 1, 1],
+      [1, 1, 2, 1, 1, 1, 0, 0, 3, 1, 0],
+      [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [4, 1, 2, 0, 0, 1, 0, 0, 2, 0, 0],
+      [2, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+      [1, 1, 2, 0, 1, 1, 0, 0, 3, 0, 1],
+      [0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1],
+      [0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0],
+      [0, 0, 0, 1, 0, 0, 1, 0, 2, 0, 1],
+      [0, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1],
+      [0, 0, 0, 1, 0, 0, 1, 0, 3, 1, 0],
+      [1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1],
+      [0, 0, 0, 0, 1, 0, 1, 1, 2, 0, 0],
+      [0, 0, 1, 1, 0, 0, 0, 0, 5, 0, 0],
+      [2, 0, 0, 1, 1, 0, 0, 1, 3, 1, 0],
+      [0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+      [1, 1, 1, 1, 0, 1, 0, 1, 4, 0, 0],
+      [0, 0, 0, 1, 2, 0, 0, 1, 2, 1, 1],
+      [5, 1, 2, 1, 0, 1, 1, 0, 1, 0, 1],
+      [2, 1, 1, 0, 0, 1, 0, 0, 2, 0, 0],
+      [0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1],
+      [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0],
+      [0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1],
+      [3, 1, 2, 1, 0, 1, 1, 1, 1, 0, 1],
+      [0, 0, 0, 1, 1, 0, 0, 1, 2, 1, 0],
+      [1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1],
+      [2, 1, 0, 0, 0, 1, 0, 1, 4, 0, 0],
+      [0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0]
+    ];
+
+    let state = makeInitialState();
+
+    function makeInitialState() {
+      const predictors = basePredictors.map((p) => ({ ...p }));
+      const weights = Object.fromEntries(predictors.map((p) => [p.key, 0]));
+      const rows = starterRows.map((r, index) => {
+        const values = {};
+        predictors.forEach((p, pi) => {
+          values[p.key] = r[pi];
+        });
+        return {
+          id: index + 1,
+          values,
+          privateTutor: 0,
+          foundResponsible: r[predictors.length],
+          selfReported: r[predictors.length + 1],
+          base: true
+        };
+      });
+      return {
+        predictors,
+        rows,
+        manualWeights: weights,
+        manualIntercept: 0,
+        manualThreshold: 0.5,
+        regressionWeights: null,
+        regressionThreshold: 0.5,
+        selectedOutcome: "foundCheating",
+        activeTab: "data",
+        predictorSerial: 1
+      };
+    }
+
+    const els = {
+      dataTable: document.getElementById("data-table"),
+      manualWeights: document.getElementById("manual-weights"),
+      manualOutput: document.getElementById("manual-output"),
+      manualOutcome: document.getElementById("manual-outcome"),
+      manualMetricsTitle: document.getElementById("manual-metrics-title"),
+      manualMetrics: document.getElementById("manual-metrics"),
+      regWeights: document.getElementById("reg-weights"),
+      regOutput: document.getElementById("reg-output"),
+      regOutcome: document.getElementById("reg-outcome"),
+      regMetricsTitle: document.getElementById("reg-metrics-title"),
+      regMetrics: document.getElementById("reg-metrics"),
+      dataStatus: document.getElementById("data-status"),
+      regStatus: document.getElementById("reg-status"),
+      newPredictor: document.getElementById("new-predictor"),
+      regThreshold: document.getElementById("reg-threshold"),
+      resetRegressionWeights: document.getElementById("reset-regression-weights")
+    };
+
+    document.querySelectorAll(".tab-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.activeTab = button.dataset.tab;
+        render();
+      });
+    });
+
+    document.getElementById("add-row").addEventListener("click", () => {
+      if (state.rows.length >= MAX_ROWS) return;
+      const values = Object.fromEntries(state.predictors.map((p) => [p.key, 0]));
+      state.rows.push({
+        id: state.rows.length + 1,
+        values,
+        privateTutor: 0,
+        foundResponsible: 0,
+        selfReported: 0,
+        base: false
+      });
+      invalidateRegressionWeights();
+      render();
+    });
+
+    document.getElementById("remove-row").addEventListener("click", () => {
+      if (state.rows.length <= BASE_ROWS) return;
+      state.rows.pop();
+      invalidateRegressionWeights();
+      render();
+    });
+
+    document.getElementById("add-predictor").addEventListener("click", () => {
+      if (state.predictors.length >= MAX_PREDICTORS) return;
+      const raw = els.newPredictor.value.trim();
+      const label = raw || `Added Predictor ${state.predictorSerial}`;
+      const key = `added_${Date.now()}_${state.predictorSerial}`;
+      state.predictorSerial += 1;
+      state.predictors.push({ key, label });
+      state.manualWeights[key] = 0;
+      state.rows.forEach((row) => {
+        row.values[key] = 0;
+      });
+      els.newPredictor.value = "";
+      invalidateRegressionWeights();
+      render();
+    });
+
+    document.getElementById("reset-data").addEventListener("click", () => {
+      state = makeInitialState();
+      render();
+    });
+
+    els.regThreshold.addEventListener("input", (event) => {
+      state.regressionThreshold = toNumber(event.target.value);
+      renderRegression();
+    });
+
+    els.resetRegressionWeights.addEventListener("click", () => {
+      resetRegressionWeightsFromModel();
+      renderRegression();
+    });
+
+    [els.manualOutcome, els.regOutcome].forEach((select) => {
+      select.addEventListener("change", (event) => {
+        state.selectedOutcome = event.target.value;
+        state.regressionWeights = null;
+        render();
+      });
+    });
+
+    function render() {
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        button.setAttribute("aria-selected", String(button.dataset.tab === state.activeTab));
+      });
+      document.getElementById("tab-data").hidden = state.activeTab !== "data";
+      document.getElementById("tab-manual").hidden = state.activeTab !== "manual";
+      document.getElementById("tab-regression").hidden = state.activeTab !== "regression";
+
+      renderData();
+      renderOutcomeSelectors();
+      renderManual();
+      renderRegression();
+    }
+
+    function selectedOutcome() {
+      return outcomes[state.selectedOutcome] || outcomes.foundCheating;
+    }
+
+    function renderOutcomeSelectors() {
+      [els.manualOutcome, els.regOutcome].forEach((select) => {
+        select.innerHTML = "";
+        Object.entries(outcomes).forEach(([outcomeId, outcome]) => {
+          const option = document.createElement("option");
+          option.value = outcomeId;
+          option.textContent = outcome.label;
+          option.selected = outcomeId === state.selectedOutcome;
+          select.append(option);
+        });
+      });
+    }
+
+    function invalidateRegressionWeights() {
+      state.regressionWeights = null;
+    }
+
+    function renderData() {
+      els.dataStatus.textContent = `${state.rows.length}/${MAX_ROWS} rows, ${state.predictors.length}/${MAX_PREDICTORS} predictors`;
+      document.getElementById("add-row").disabled = state.rows.length >= MAX_ROWS;
+      document.getElementById("remove-row").disabled = state.rows.length <= BASE_ROWS;
+      document.getElementById("add-predictor").disabled = state.predictors.length >= MAX_PREDICTORS;
+
+      const table = els.dataTable;
+      table.innerHTML = "";
+      const thead = table.createTHead();
+      const header = thead.insertRow();
+      addTh(header, "Student", "compact");
+      state.predictors.forEach((predictor, pi) => {
+        const th = document.createElement("th");
+        if (pi < basePredictors.length) {
+          th.textContent = predictor.label;
+        } else {
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = predictor.label;
+          input.addEventListener("input", (event) => {
+            predictor.label = event.target.value || `Added Predictor ${pi - basePredictors.length + 1}`;
+            renderManual();
+            renderRegression();
+          });
+          th.append(input);
+        }
+        header.append(th);
+      });
+      addTh(header, "Private Tutor [not in university data]", "unavailable");
+      addTh(header, "Found Cheating (0/1)", "found");
+      addTh(header, "Self-Reported Cheating (0/1)", "self");
+
+      const tbody = table.createTBody();
+      state.rows.forEach((row, ri) => {
+        const tr = tbody.insertRow();
+        addTd(tr, row.id, "compact");
+        state.predictors.forEach((predictor) => {
+          const td = tr.insertCell();
+          td.append(numberInput(row.values[predictor.key], (value) => {
+            row.values[predictor.key] = value;
+            invalidateRegressionWeights();
+            renderManual();
+            renderRegression();
+          }, 1, 0));
+        });
+        addTd(tr, "Unavailable", "unavailable");
+        const found = tr.insertCell();
+        found.className = "found";
+        found.append(binaryInput(row.foundResponsible, (value) => {
+          row.foundResponsible = value;
+          invalidateRegressionWeights();
+          renderManual();
+          renderRegression();
+        }));
+        const self = tr.insertCell();
+        self.className = "self";
+        self.append(binaryInput(row.selfReported, (value) => {
+          row.selfReported = value;
+          invalidateRegressionWeights();
+          renderManual();
+          renderRegression();
+        }));
+      });
+    }
+
+    function renderManual() {
+      const outcome = selectedOutcome();
+      renderManualWeights();
+      const results = manualResults();
+      renderManualOutputs(results, outcome);
+      els.manualMetricsTitle.textContent = `${outcome.label} Confusion Matrix`;
+      renderMetrics(els.manualMetrics, confusion(results.map((r) => [r.prediction, r.row[outcome.key]])), null, outcome.label);
+    }
+
+    function renderManualWeights() {
+      const table = els.manualWeights;
+      table.innerHTML = "";
+      const thead = table.createTHead();
+      const header = thead.insertRow();
+      ["Variable", "Data Column", "Your Weight"].forEach((h, i) => addTh(header, h, i === 2 ? "manual" : ""));
+      const tbody = table.createTBody();
+      state.predictors.forEach((predictor, index) => {
+        const tr = tbody.insertRow();
+        addTd(tr, predictor.label, "left");
+        addTd(tr, columnName(index + 2), "compact");
+        const weight = tr.insertCell();
+        styleWeightCell(weight, state.manualWeights[predictor.key] ?? 0);
+        weight.append(numberInput(state.manualWeights[predictor.key] ?? 0, (value) => {
+          state.manualWeights[predictor.key] = value;
+          renderManual();
+        }, 0.1));
+      });
+      const intercept = tbody.insertRow();
+      addTd(intercept, "Intercept / base score", "left");
+      addTd(intercept, "");
+      const interceptCell = intercept.insertCell();
+      styleWeightCell(interceptCell, state.manualIntercept);
+      interceptCell.append(numberInput(state.manualIntercept, (value) => {
+        state.manualIntercept = value;
+        renderManual();
+      }, 0.1));
+
+      const threshold = tbody.insertRow();
+      addTd(threshold, "Decision threshold", "left");
+      addTd(threshold, "predict 1 if score >=");
+      const thresholdCell = threshold.insertCell();
+      thresholdCell.className = "manual";
+      thresholdCell.append(numberInput(state.manualThreshold, (value) => {
+        state.manualThreshold = value;
+        renderManual();
+      }, 0.05));
+    }
+
+    function renderManualOutputs(results, outcome) {
+      const table = els.manualOutput;
+      table.innerHTML = "";
+      const thead = table.createTHead();
+      const header = thead.insertRow();
+      addTh(header, "Student", "compact");
+      state.predictors.forEach((p) => addTh(header, p.label));
+      ["Score", "Predicted", `${outcome.shortLabel} Actual`, `Error vs ${outcome.shortLabel}`].forEach((h, i) => {
+        addTh(header, h, i < 2 ? "manual" : outcome.css);
+      });
+      const tbody = table.createTBody();
+      results.forEach((result) => {
+        const tr = tbody.insertRow();
+        addTd(tr, result.row.id, "compact");
+        state.predictors.forEach((p) => addTd(tr, formatNumber(result.row.values[p.key], 2)));
+        addTd(tr, formatNumber(result.score, 3), "manual");
+        addTd(tr, result.prediction, "manual");
+        addTd(tr, result.row[outcome.key], outcome.css);
+        addTd(tr, errorLabel(result.prediction, result.row[outcome.key]), errorClass(result.prediction, result.row[outcome.key]));
+      });
+    }
+
+    function renderRegression() {
+      const outcome = selectedOutcome();
+      els.regThreshold.value = state.regressionThreshold;
+      const model = fitRegression(outcome.key);
+      ensureRegressionWeights(model);
+      const warnings = [model.warning].filter(Boolean);
+      els.regStatus.textContent = warnings.length ? warnings.join(" ") : "OLS regression weights loaded; edit any weight to test alternatives.";
+      renderRegressionWeights(model, outcome);
+      const results = regressionResults();
+      renderRegressionOutputs(results, outcome);
+      els.regMetricsTitle.textContent = `${outcome.label} Regression Confusion Matrix`;
+      renderMetrics(
+        els.regMetrics,
+        confusion(results.map((r) => [r.prediction, r.row[outcome.key]])),
+        (metric) => optimizeRegressionThreshold(metric),
+        outcome.label
+      );
+    }
+
+    function ensureRegressionWeights(model) {
+      if (state.regressionWeights && state.regressionWeights.outcomeKey === state.selectedOutcome) return;
+      state.regressionWeights = weightsFromModel(model);
+    }
+
+    function resetRegressionWeightsFromModel() {
+      state.regressionWeights = weightsFromModel(fitRegression(selectedOutcome().key));
+    }
+
+    function weightsFromModel(model) {
+      return {
+        outcomeKey: state.selectedOutcome,
+        weights: coefficientsToWeights(model.coefficients),
+        intercept: model.intercept
+      };
+    }
+
+    function renderRegressionWeights(model, outcome) {
+      const table = els.regWeights;
+      table.innerHTML = "";
+      const thead = table.createTHead();
+      const header = thead.insertRow();
+      ["Variable", "Data Column", `${outcome.label} Weight`].forEach((h, i) => {
+        addTh(header, h, i === 2 ? outcome.css : "");
+      });
+      const tbody = table.createTBody();
+      state.predictors.forEach((p, index) => {
+        const tr = tbody.insertRow();
+        addTd(tr, p.label, "left");
+        addTd(tr, columnName(index + 2), "compact");
+        const weightCell = tr.insertCell();
+        styleWeightCell(weightCell, state.regressionWeights.weights[p.key] ?? 0);
+        weightCell.append(numberInput(state.regressionWeights.weights[p.key] ?? 0, (value) => {
+          state.regressionWeights.weights[p.key] = value;
+          renderRegression();
+        }, 0.01, 4));
+      });
+      const tr = tbody.insertRow();
+      addTd(tr, "Intercept / base score", "left");
+      addTd(tr, "");
+      const interceptCell = tr.insertCell();
+      styleWeightCell(interceptCell, state.regressionWeights.intercept);
+      interceptCell.append(numberInput(state.regressionWeights.intercept, (value) => {
+        state.regressionWeights.intercept = value;
+        renderRegression();
+      }, 0.01, 4));
+    }
+
+    function renderRegressionOutputs(results, outcome) {
+      const table = els.regOutput;
+      table.innerHTML = "";
+      const thead = table.createTHead();
+      const header = thead.insertRow();
+      ["Student", "Score", "Predicted", `${outcome.shortLabel} Actual`, `Error vs ${outcome.shortLabel}`].forEach((h, i) => {
+        addTh(header, h, i >= 1 ? outcome.css : "compact");
+      });
+      state.predictors.forEach((p) => addTh(header, p.label));
+      addTh(header, "Private Tutor unavailable", "unavailable");
+
+      const tbody = table.createTBody();
+      results.forEach((result) => {
+        const tr = tbody.insertRow();
+        addTd(tr, result.row.id, "compact");
+        addTd(tr, formatNumber(result.score, 3), outcome.css);
+        addTd(tr, result.prediction, outcome.css);
+        addTd(tr, result.row[outcome.key], outcome.css);
+        addTd(tr, errorLabel(result.prediction, result.row[outcome.key]), errorClass(result.prediction, result.row[outcome.key]));
+        state.predictors.forEach((p) => addTd(tr, formatNumber(result.row.values[p.key], 2)));
+        addTd(tr, "Unavailable", "unavailable");
+      });
+    }
+
+    function manualResults() {
+      return state.rows.map((row) => {
+        const score = scoreRow(row, state.manualWeights, state.manualIntercept);
+        return { row, score, prediction: score >= state.manualThreshold ? 1 : 0 };
+      });
+    }
+
+    function regressionResults() {
+      return state.rows.map((row) => {
+        const score = scoreRow(row, state.regressionWeights.weights, state.regressionWeights.intercept);
+        return {
+          row,
+          score,
+          prediction: score >= state.regressionThreshold ? 1 : 0
+        };
+      });
+    }
+
+    function optimizeRegressionThreshold(metric) {
+      const outcome = selectedOutcome();
+      const scored = state.rows.map((row) => ({
+        score: scoreRow(row, state.regressionWeights.weights, state.regressionWeights.intercept),
+        actual: row[outcome.key]
+      }));
+      const candidates = thresholdCandidates(scored.map((item) => item.score));
+      let best = null;
+      candidates.forEach((threshold) => {
+        const counts = confusion(scored.map((item) => [item.score >= threshold ? 1 : 0, item.actual]));
+        const value = metricValue(counts, metric);
+        const comparable = value === null ? (metric === "fdr" ? Infinity : -Infinity) : value;
+        const objective = metric === "fdr" ? -comparable : comparable;
+        const tieBreaker = metric === "fdr" ? counts.fp : counts.tp + counts.tn;
+        if (
+          !best ||
+          objective > best.objective + 1e-12 ||
+          (Math.abs(objective - best.objective) <= 1e-12 && tieBreaker > best.tieBreaker)
+        ) {
+          best = { threshold, objective, tieBreaker };
+        }
+      });
+      if (!best) return;
+      state.regressionThreshold = Number(best.threshold.toFixed(4));
+      renderRegression();
+    }
+
+    function thresholdCandidates(scores) {
+      const sorted = [...new Set(scores)].sort((a, b) => a - b);
+      if (!sorted.length) return [0.5];
+      const candidates = [sorted[0] - 0.001, sorted[sorted.length - 1] + 0.001];
+      for (let i = 0; i < sorted.length - 1; i += 1) {
+        candidates.push((sorted[i] + sorted[i + 1]) / 2);
+      }
+      sorted.forEach((score) => candidates.push(score));
+      return candidates;
+    }
+
+    function metricValue(counts, metric) {
+      const total = counts.tp + counts.fp + counts.fn + counts.tn;
+      if (metric === "accuracy") return safeRate(counts.tp + counts.tn, total);
+      if (metric === "tpr") return safeRate(counts.tp, counts.tp + counts.fn);
+      if (metric === "tnr") return safeRate(counts.tn, counts.tn + counts.fp);
+      if (metric === "ppv") return safeRate(counts.tp, counts.tp + counts.fp);
+      if (metric === "fdr") return safeRate(counts.fp, counts.tp + counts.fp);
+      if (metric === "f1") return safeRate(2 * counts.tp, 2 * counts.tp + counts.fp + counts.fn);
+      return null;
+    }
+
+    function scoreRow(row, weights, intercept) {
+      return state.predictors.reduce((sum, predictor) => {
+        return sum + toNumber(row.values[predictor.key]) * toNumber(weights[predictor.key]);
+      }, toNumber(intercept));
+    }
+
+    function coefficientsToWeights(coefficients) {
+      return Object.fromEntries(state.predictors.map((p, index) => [p.key, coefficients[index] ?? 0]));
+    }
+
+    function fitRegression(outcomeKey) {
+      const x = state.rows.map((row) => [1, ...state.predictors.map((p) => toNumber(row.values[p.key]))]);
+      const y = state.rows.map((row) => toNumber(row[outcomeKey]));
+      let beta = solveNormalEquations(x, y, 0);
+      let warning = "";
+      if (!beta) {
+        beta = solveNormalEquations(x, y, 1e-8);
+        warning = "Ridge fallback used for a near-duplicate predictor.";
+      }
+      if (!beta) {
+        beta = new Array(state.predictors.length + 1).fill(0);
+        warning = "Regression could not be solved with the current columns.";
+      }
+      return {
+        intercept: beta[0],
+        coefficients: beta.slice(1),
+        warning
+      };
+    }
+
+    function solveNormalEquations(x, y, ridge) {
+      const rows = x.length;
+      const cols = x[0].length;
+      const xtx = Array.from({ length: cols }, () => new Array(cols).fill(0));
+      const xty = new Array(cols).fill(0);
+
+      for (let r = 0; r < rows; r += 1) {
+        for (let i = 0; i < cols; i += 1) {
+          xty[i] += x[r][i] * y[r];
+          for (let j = 0; j < cols; j += 1) {
+            xtx[i][j] += x[r][i] * x[r][j];
+          }
+        }
+      }
+
+      for (let i = 1; i < cols; i += 1) {
+        xtx[i][i] += ridge;
+      }
+
+      return gaussianSolve(xtx, xty);
+    }
+
+    function gaussianSolve(matrix, vector) {
+      const n = vector.length;
+      const a = matrix.map((row, i) => [...row, vector[i]]);
+
+      for (let col = 0; col < n; col += 1) {
+        let pivot = col;
+        for (let row = col + 1; row < n; row += 1) {
+          if (Math.abs(a[row][col]) > Math.abs(a[pivot][col])) pivot = row;
+        }
+        if (Math.abs(a[pivot][col]) < 1e-10) return null;
+        [a[col], a[pivot]] = [a[pivot], a[col]];
+
+        const pivotValue = a[col][col];
+        for (let j = col; j <= n; j += 1) a[col][j] /= pivotValue;
+
+        for (let row = 0; row < n; row += 1) {
+          if (row === col) continue;
+          const factor = a[row][col];
+          for (let j = col; j <= n; j += 1) a[row][j] -= factor * a[col][j];
+        }
+      }
+
+      return a.map((row) => row[n]);
+    }
+
+    function confusion(pairs) {
+      const counts = { tp: 0, fp: 0, fn: 0, tn: 0 };
+      pairs.forEach(([predicted, actual]) => {
+        if (predicted === 1 && actual === 1) counts.tp += 1;
+        else if (predicted === 1 && actual === 0) counts.fp += 1;
+        else if (predicted === 0 && actual === 1) counts.fn += 1;
+        else counts.tn += 1;
+      });
+      counts.accuracy = pairs.length ? (counts.tp + counts.tn) / pairs.length : 0;
+      return counts;
+    }
+
+    function renderMetrics(container, counts, onMetricClick = null, positiveLabel = "Positive") {
+      container.className = "confusion-panel";
+      container.innerHTML = "";
+      const total = counts.tp + counts.fp + counts.fn + counts.tn;
+      const rates = [
+        ["accuracy", "Accuracy", safeRate(counts.tp + counts.tn, total)],
+        ["tpr", "True positive rate | recall | sensitivity", safeRate(counts.tp, counts.tp + counts.fn)],
+        ["tnr", "True negative rate | specificity", safeRate(counts.tn, counts.tn + counts.fp)],
+        ["ppv", "Positive predictive value | precision", safeRate(counts.tp, counts.tp + counts.fp)],
+        ["fdr", "False discovery rate", safeRate(counts.fp, counts.tp + counts.fp)],
+        ["f1", "F1 score", safeRate(2 * counts.tp, 2 * counts.tp + counts.fp + counts.fn)]
+      ];
+      const table = document.createElement("table");
+      table.className = "confusion-table";
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th class="axis">Predicted \\ Actual</th>
+            <th class="axis">Actual 1<br>(${positiveLabel})</th>
+            <th class="axis">Actual 0<br>(Not ${positiveLabel})</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th class="axis">Predicted 1<br>(${positiveLabel})</th>
+            <td class="tp">${counts.tp}<br>True Positive</td>
+            <td class="fp">${counts.fp}<br>False Positive</td>
+          </tr>
+          <tr>
+            <th class="axis">Predicted 0<br>(Not ${positiveLabel})</th>
+            <td class="fn">${counts.fn}<br>False Negative</td>
+            <td class="tn">${counts.tn}<br>True Negative</td>
+          </tr>
+        </tbody>
+      `;
+      const rateGrid = document.createElement("div");
+      rateGrid.className = "rate-grid";
+      rates.forEach(([key, label, value]) => {
+        const div = document.createElement("div");
+        div.className = onMetricClick ? "rate clickable" : "rate";
+        if (onMetricClick) {
+          div.title = key === "fdr" ? "Click to set the threshold that minimizes this metric" : "Click to set the threshold that maximizes this metric";
+          div.addEventListener("click", () => onMetricClick(key));
+        }
+        div.innerHTML = `<div class="label">${label}</div><div class="value">${formatRate(value)}</div>`;
+        rateGrid.append(div);
+      });
+      container.append(table, rateGrid);
+    }
+
+    function safeRate(numerator, denominator) {
+      return denominator > 0 ? numerator / denominator : null;
+    }
+
+    function formatRate(value) {
+      return value === null ? "N/A" : `${(value * 100).toFixed(1)}%`;
+    }
+
+    function errorLabel(predicted, actual) {
+      if (predicted === 1 && actual === 1) return "True Positive";
+      if (predicted === 1 && actual === 0) return "False Positive";
+      if (predicted === 0 && actual === 1) return "False Negative";
+      return "True Negative";
+    }
+
+    function errorClass(predicted, actual) {
+      if (predicted === 1 && actual === 1) return "error-tp";
+      if (predicted === 1 && actual === 0) return "error-fp";
+      if (predicted === 0 && actual === 1) return "error-fn";
+      return "error-tn";
+    }
+
+    function numberInput(value, onChange, step = 1, digits = 3) {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.step = String(step);
+      input.value = formatNumber(value, digits);
+      input.addEventListener("input", (event) => onChange(toNumber(event.target.value)));
+      return input;
+    }
+
+    function binaryInput(value, onChange) {
+      const select = document.createElement("select");
+      [0, 1].forEach((optionValue) => {
+        const option = document.createElement("option");
+        option.value = String(optionValue);
+        option.textContent = String(optionValue);
+        option.selected = value === optionValue;
+        select.append(option);
+      });
+      select.addEventListener("change", (event) => onChange(Number(event.target.value)));
+      return select;
+    }
+
+    function addTh(row, text, className = "") {
+      const th = document.createElement("th");
+      if (className) th.className = className;
+      if (String(text).startsWith("=")) {
+        th.textContent = text;
+      } else {
+        th.textContent = text;
+      }
+      row.append(th);
+      return th;
+    }
+
+    function addTd(row, text, className = "") {
+      const td = row.insertCell();
+      if (className) td.className = className;
+      td.textContent = text;
+      return td;
+    }
+
+    function addCoef(row, value, className = "") {
+      const td = addTd(row, formatNumber(value, 4), className);
+      if (value > 0.0005) td.classList.add("coef-pos");
+      else if (value < -0.0005) td.classList.add("coef-neg");
+      else td.classList.add("coef-zero");
+    }
+
+    function styleWeightCell(cell, value) {
+      cell.className = "weight-scale";
+      cell.style.backgroundColor = weightColor(value);
+    }
+
+    function weightColor(value) {
+      const v = Math.max(-1, Math.min(1, toNumber(value)));
+      const yellow = [255, 242, 204];
+      const green = [56, 118, 29];
+      const red = [204, 0, 0];
+      if (Math.abs(v) < 0.0005) return rgb(yellow);
+      const end = v > 0 ? green : red;
+      const t = Math.min(1, Math.sqrt(Math.abs(v)));
+      return rgb(yellow.map((start, i) => Math.round(start + (end[i] - start) * t)));
+    }
+
+    function rgb(parts) {
+      return `rgb(${parts[0]}, ${parts[1]}, ${parts[2]})`;
+    }
+
+    function toNumber(value) {
+      const num = Number(value);
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    function formatNumber(value, digits = 3) {
+      const num = toNumber(value);
+      if (Math.abs(num - Math.round(num)) < 1e-10 && digits <= 2) return String(Math.round(num));
+      return num.toFixed(digits);
+    }
+
+    function columnName(index) {
+      let name = "";
+      let n = index;
+      while (n > 0) {
+        const rem = (n - 1) % 26;
+        name = String.fromCharCode(65 + rem) + name;
+        n = Math.floor((n - 1) / 26);
+      }
+      return name;
+    }
+
+    render();
+  </script>
+</body>
+</html>
